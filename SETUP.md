@@ -41,6 +41,7 @@ In the Apps Script editor, go to **Project Settings** (gear icon) → **Script P
 | `TELEGRAM_BOT_TOKEN` | Your bot token from [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_CHAT_ID` | The chat ID to send messages to |
 | `ALLOWED_PRODUCTS` | Comma-separated product names to accept, e.g. `my-app, my-other-app` (recommended) |
+| `ALLOWED_CALLBACK_HOSTS` | Comma-separated hostnames allowed in `callback_url`, e.g. `api.my-app.com` (recommended if you use webhooks) |
 
 Secrets stay in Script Properties, never in code.
 

@@ -31,3 +31,15 @@ function isValidCallbackUrl(url) {
   if (!url || typeof url !== 'string') return false;
   return /^https:\/\/.+/.test(url.trim());
 }
+
+function isAllowedCallbackHost(url) {
+  var allowed = PropertiesService.getScriptProperties().getProperty('ALLOWED_CALLBACK_HOSTS');
+  if (!allowed) return true;
+
+  var match = /^https:\/\/([^\/?#]+)/i.exec(url.trim());
+  if (!match || match[1].indexOf('@') !== -1) return false;
+  var host = match[1].replace(/:\d+$/, '').toLowerCase();
+
+  var list = allowed.split(',').map(function(h) { return h.trim().toLowerCase(); });
+  return list.indexOf(host) !== -1;
+}

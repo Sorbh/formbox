@@ -35,6 +35,10 @@ function validateEnvelope(body) {
     return 'callback_url must be a valid HTTPS URL';
   }
 
+  if (body.callback_url && !isAllowedCallbackHost(body.callback_url)) {
+    return 'callback_url host is not allowed';
+  }
+
   return null;
 }
 

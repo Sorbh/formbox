@@ -1,8 +1,17 @@
 # Formbox
 
-A single API endpoint that collects form submissions from all your products, stores them in Google Sheets, and emails you the full data on every submission.
+A free, serverless form backend that runs on Google Apps Script. One API endpoint collects form submissions from all your sites and apps, stores them in Google Sheets, and notifies you by email and/or Telegram.
 
-One endpoint. Any product. Any form type. Zero config.
+One endpoint. Any product. Any form type. No server to run.
+
+## Features
+
+- **Google Sheets storage** — one spreadsheet per product, one tab per form type, columns added automatically
+- **Notifications** — HTML email and/or Telegram message on every submission, each toggled independently
+- **Webhooks** — optional `callback_url` receives the full submission as JSON
+- **Spam protection** — honeypot fields, per-product and global rate limits
+- **Lockdown options** — restrict accepted products and webhook hosts via Script Properties
+- **Free** — runs entirely on your own Google account, no hosting or third-party service
 
 ## How It Works
 
@@ -10,7 +19,7 @@ One endpoint. Any product. Any form type. Zero config.
 2. Formbox auto-creates a Google Spreadsheet for the product (if new)
 3. Formbox auto-creates a tab for the form type (if new)
 4. Formbox auto-expands columns for any new payload fields
-5. Formbox emails you the full submission data
+5. Formbox notifies you by email and/or Telegram, and calls your webhook if one was given
 
 ## API
 
@@ -182,6 +191,8 @@ When `TELEGRAM_ENABLED` is `true`, every submission is also posted to `TELEGRAM_
 
 Send a `callback_url` in the request to receive a POST with the full submission data after processing. The URL must be HTTPS.
 
+To stop others from using your deployment to send requests to arbitrary URLs, set the `ALLOWED_CALLBACK_HOSTS` Script Property to a comma-separated list of hostnames (e.g. `api.my-app.com, hooks.my-other-app.com`). Requests with any other callback host are rejected with `callback_url host is not allowed`.
+
 ```js
 submitToFormbox('my-app', 'contact', 'jane@example.com', {
   name: 'Jane Doe',
@@ -252,6 +263,7 @@ Notifications and secrets are configured in **Project Settings → Script Proper
 | `TELEGRAM_BOT_TOKEN` | Bot token from [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_CHAT_ID` | Chat ID that receives Telegram notifications |
 | `ALLOWED_PRODUCTS` | Optional comma-separated list of accepted `product_name` values |
+| `ALLOWED_CALLBACK_HOSTS` | Optional comma-separated list of hostnames allowed in `callback_url` |
 
 Email and Telegram are independent — enable either, both, or neither.
 
@@ -303,6 +315,7 @@ formbox/
 ├── TelegramNotification.gs — Telegram message formatting and sending
 ├── Webhook.gs         — Webhook callback to external URLs
 ├── SETUP.md           — Step-by-step deployment guide
+├── SECURITY.md        — How to report vulnerabilities
 ├── LICENSE            — MIT license
 └── README.md          — This file
 ```
