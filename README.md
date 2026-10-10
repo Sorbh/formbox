@@ -315,6 +315,7 @@ formbox/
 ├── TelegramNotification.gs — Telegram message formatting and sending
 ├── Webhook.gs         — Webhook callback to external URLs
 ├── SETUP.md           — Step-by-step deployment guide
+├── CONTRIBUTING.md    — How to contribute
 ├── SECURITY.md        — How to report vulnerabilities
 ├── LICENSE            — MIT license
 └── README.md          — This file
@@ -329,6 +330,10 @@ formbox/
 | Properties storage | 500 KB | 500 KB |
 
 If you expect more than 100 submissions/day, use Google Workspace or switch to a digest notification model.
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). For security issues, see [SECURITY.md](SECURITY.md).
 
 ## License
 
