@@ -1,8 +1,12 @@
 const CONFIG = {
   RATE_LIMIT: {
-    PER_MINUTE: 5,
-    PER_HOUR: 50,
+    PER_PRODUCT_PER_MINUTE: 5,
+    PER_PRODUCT_PER_HOUR: 50,
+    GLOBAL_PER_MINUTE: 20,
+    GLOBAL_PER_HOUR: 200,
   },
+
+  MAX_NAME_LENGTH: 100,
 
   PRIORITY_VALUES: ['low', 'normal', 'high', 'urgent'],
   DEFAULT_PRIORITY: 'normal',

@@ -10,8 +10,12 @@ function doPost(e) {
     return sendJson(400, { status: 'error', message: validation });
   }
 
-  var ip = extractIp(e);
-  if (isRateLimited(ip)) {
+  var productName = body.product_name.trim().toLowerCase();
+  if (!isAllowedProduct(productName)) {
+    return sendJson(403, { status: 'error', message: 'Unknown product_name' });
+  }
+
+  if (isRateLimited(productName)) {
     return sendJson(429, { status: 'error', message: 'Rate limit exceeded. Try again later.' });
   }
 
@@ -25,7 +29,7 @@ function doPost(e) {
   var submission = {
     submission_id: generateId(),
     timestamp: new Date().toISOString(),
-    product_name: body.product_name.trim().toLowerCase(),
+    product_name: productName,
     form_type: body.form_type.trim().toLowerCase(),
     submitter_email: body.submitter_email.trim().toLowerCase(),
     source_url: body.source_url || '',

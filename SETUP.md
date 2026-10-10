@@ -40,6 +40,7 @@ In the Apps Script editor, go to **Project Settings** (gear icon) → **Script P
 | `TELEGRAM_ENABLED` | `true` to enable Telegram notifications |
 | `TELEGRAM_BOT_TOKEN` | Your bot token from [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_CHAT_ID` | The chat ID to send messages to |
+| `ALLOWED_PRODUCTS` | Comma-separated product names to accept, e.g. `my-app, my-other-app` (recommended) |
 
 Secrets stay in Script Properties, never in code.
 
@@ -96,7 +97,7 @@ formbox/
 ├── Config.gs          # Configuration (rate limits, settings)
 ├── Main.gs            # doPost/doGet entry points
 ├── Validation.gs      # Envelope validation + email check
-├── RateLimit.gs       # Per-IP rate limiting via CacheService
+├── RateLimit.gs       # Per-product and global rate limiting via CacheService
 ├── Honeypot.gs        # Bot detection via hidden fields
 ├── Utils.gs           # ID generation
 ├── SheetWriter.gs     # Spreadsheet/tab/column auto-creation

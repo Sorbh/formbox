@@ -1,24 +1,28 @@
-function extractIp(e) {
-  // Apps Script doesn't expose client IP directly in web apps.
-  // We use a hash of available request identifiers as a rough proxy.
-  var identifier = (e.parameter && e.parameter._client_id) || 'unknown';
-  return identifier;
-}
+// Apps Script web apps don't expose the client IP, and any identifier the
+// caller sends can be rotated freely. So limits are keyed on things the
+// caller can't multiply: a global bucket (protects Mail/Drive/UrlFetch
+// quotas) and a per-product bucket (one noisy product can't starve the rest).
+function isRateLimited(productName) {
+  var limits = CONFIG.RATE_LIMIT;
+  var buckets = [
+    { key: 'rl_global_min', limit: limits.GLOBAL_PER_MINUTE, ttl: 60 },
+    { key: 'rl_global_hr', limit: limits.GLOBAL_PER_HOUR, ttl: 3600 },
+    { key: 'rl_product_min_' + productName, limit: limits.PER_PRODUCT_PER_MINUTE, ttl: 60 },
+    { key: 'rl_product_hr_' + productName, limit: limits.PER_PRODUCT_PER_HOUR, ttl: 3600 },
+  ];
 
-function isRateLimited(ip) {
   var cache = CacheService.getScriptCache();
+  var counts = cache.getAll(buckets.map(function(b) { return b.key; }));
 
-  var minuteKey = 'rl_min_' + ip;
-  var hourKey = 'rl_hr_' + ip;
+  for (var i = 0; i < buckets.length; i++) {
+    var count = parseInt(counts[buckets[i].key] || '0', 10);
+    if (count >= buckets[i].limit) return true;
+  }
 
-  var minuteCount = parseInt(cache.get(minuteKey) || '0', 10);
-  var hourCount = parseInt(cache.get(hourKey) || '0', 10);
-
-  if (minuteCount >= CONFIG.RATE_LIMIT.PER_MINUTE) return true;
-  if (hourCount >= CONFIG.RATE_LIMIT.PER_HOUR) return true;
-
-  cache.put(minuteKey, String(minuteCount + 1), 60);
-  cache.put(hourKey, String(hourCount + 1), 3600);
+  for (var j = 0; j < buckets.length; j++) {
+    var current = parseInt(counts[buckets[j].key] || '0', 10);
+    cache.put(buckets[j].key, String(current + 1), buckets[j].ttl);
+  }
 
   return false;
 }

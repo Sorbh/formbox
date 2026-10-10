@@ -41,8 +41,8 @@ Content-Type: text/plain
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `product_name` | Yes | Identifies the product. A separate spreadsheet is created per product. |
-| `form_type` | Yes | Identifies the form (e.g., `contact`, `wishlist`, `support`). Becomes the sheet tab name. |
+| `product_name` | Yes | Identifies the product. A separate spreadsheet is created per product. Max 100 chars. |
+| `form_type` | Yes | Identifies the form (e.g., `contact`, `wishlist`, `support`). Becomes the sheet tab name. Max 100 chars. |
 | `submitter_email` | Yes | Email of the person submitting. Basic format validation applied. |
 | `source_url` | No | Page URL where the form was submitted from. |
 | `priority` | No | One of `low`, `normal`, `high`, `urgent`. Defaults to `normal`. |
@@ -220,9 +220,23 @@ Your callback endpoint receives:
 
 ## Rate Limiting
 
-- 5 submissions per minute per client
-- 50 submissions per hour per client
-- Exceeding either limit returns a 429 error
+Apps Script doesn't expose the client IP, so limits are applied per product and globally:
+
+- 5 submissions per minute / 50 per hour per `product_name`
+- 20 submissions per minute / 200 per hour across all products (protects your Mail, Drive and UrlFetch quotas)
+- Exceeding any limit returns a 429 error
+
+Adjust these in `Config.gs` under `RATE_LIMIT`.
+
+## Restricting Products
+
+By default any `product_name` is accepted, and each new one creates a spreadsheet. To accept only your own products, set the `ALLOWED_PRODUCTS` Script Property to a comma-separated list:
+
+```
+my-app, my-other-app
+```
+
+Submissions for any other product are rejected with `Unknown product_name`. This is strongly recommended for public deployments.
 
 ## Configuration
 
@@ -237,6 +251,7 @@ Notifications and secrets are configured in **Project Settings → Script Proper
 | `TELEGRAM_ENABLED` | Set to `true` to send Telegram notifications |
 | `TELEGRAM_BOT_TOKEN` | Bot token from [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_CHAT_ID` | Chat ID that receives Telegram notifications |
+| `ALLOWED_PRODUCTS` | Optional comma-separated list of accepted `product_name` values |
 
 Email and Telegram are independent — enable either, both, or neither.
 
@@ -247,9 +262,12 @@ Non-secret settings live in `Config.gs`:
 ```js
 const CONFIG = {
   RATE_LIMIT: {
-    PER_MINUTE: 5,
-    PER_HOUR: 50,
+    PER_PRODUCT_PER_MINUTE: 5,
+    PER_PRODUCT_PER_HOUR: 50,
+    GLOBAL_PER_MINUTE: 20,
+    GLOBAL_PER_HOUR: 200,
   },
+  MAX_NAME_LENGTH: 100,
   PRIORITY_VALUES: ['low', 'normal', 'high', 'urgent'],
   DEFAULT_PRIORITY: 'normal',
   ENVELOPE_COLUMNS: [ /* fixed leading sheet columns */ ],
@@ -277,7 +295,7 @@ formbox/
 ├── Config.gs          — Rate limits, settings
 ├── Main.gs            — doPost() / doGet() entry points
 ├── Validation.gs      — Required fields + email validation
-├── RateLimit.gs       — Per-client rate limiting
+├── RateLimit.gs       — Per-product and global rate limiting
 ├── Honeypot.gs        — Bot detection
 ├── Utils.gs           — ID generation
 ├── SheetWriter.gs     — Auto-create spreadsheets, tabs, columns

@@ -7,6 +7,14 @@ function validateEnvelope(body) {
     return 'Missing required field: form_type';
   }
 
+  if (body.product_name.trim().length > CONFIG.MAX_NAME_LENGTH) {
+    return 'product_name must be at most ' + CONFIG.MAX_NAME_LENGTH + ' characters';
+  }
+
+  if (body.form_type.trim().length > CONFIG.MAX_NAME_LENGTH) {
+    return 'form_type must be at most ' + CONFIG.MAX_NAME_LENGTH + ' characters';
+  }
+
   if (!body.submitter_email || typeof body.submitter_email !== 'string' || !body.submitter_email.trim()) {
     return 'Missing required field: submitter_email';
   }
@@ -28,6 +36,13 @@ function validateEnvelope(body) {
   }
 
   return null;
+}
+
+function isAllowedProduct(productName) {
+  var allowed = PropertiesService.getScriptProperties().getProperty('ALLOWED_PRODUCTS');
+  if (!allowed) return true;
+  var list = allowed.split(',').map(function(p) { return p.trim().toLowerCase(); });
+  return list.indexOf(productName) !== -1;
 }
 
 function isValidEmail(email) {
