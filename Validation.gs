@@ -1,0 +1,41 @@
+function validateEnvelope(body) {
+  if (!body.product_name || typeof body.product_name !== 'string' || !body.product_name.trim()) {
+    return 'Missing required field: product_name';
+  }
+
+  if (!body.form_type || typeof body.form_type !== 'string' || !body.form_type.trim()) {
+    return 'Missing required field: form_type';
+  }
+
+  if (!body.submitter_email || typeof body.submitter_email !== 'string' || !body.submitter_email.trim()) {
+    return 'Missing required field: submitter_email';
+  }
+
+  if (!isValidEmail(body.submitter_email)) {
+    return 'Invalid email format: submitter_email';
+  }
+
+  if (body.priority && CONFIG.PRIORITY_VALUES.indexOf(body.priority) === -1) {
+    return 'Invalid priority. Must be one of: ' + CONFIG.PRIORITY_VALUES.join(', ');
+  }
+
+  if (body.payload && typeof body.payload !== 'object') {
+    return 'payload must be a JSON object';
+  }
+
+  if (body.callback_url && !isValidCallbackUrl(body.callback_url)) {
+    return 'callback_url must be a valid HTTPS URL';
+  }
+
+  return null;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function normalizePriority(value) {
+  if (!value) return CONFIG.DEFAULT_PRIORITY;
+  var lower = value.trim().toLowerCase();
+  return CONFIG.PRIORITY_VALUES.indexOf(lower) !== -1 ? lower : CONFIG.DEFAULT_PRIORITY;
+}
